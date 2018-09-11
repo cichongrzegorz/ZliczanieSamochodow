@@ -1,0 +1,9 @@
+gradle
+app/build
+opencv/build
+.gradle
+.idea
+*.iml
+**/*.iml
+image-difference.zip
+opencv/javadoc

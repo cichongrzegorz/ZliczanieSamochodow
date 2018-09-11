@@ -66,13 +66,8 @@ public class Gaussian implements ChangedImageReader {
 
 //        double h = frame.size().height;
 //        double w = frame.size().width;
-
-        if (data.p1x != null && data.p1y != null && data.p2x != null && data.p2y != null && data.p3x != null && data.p3y != null && data.p4x != null && data.p4y != null) {
-            MatOfPoint p = new MatOfPoint(
-                    new Point(data.p1x, data.p1y),
-                    new Point(data.p2x, data.p2y),
-                    new Point(data.p3x, data.p3y),
-                    new Point(data.p4x, data.p4y));
+        if (data.obszarSprawdzania.obszarUstawiony()) {
+            MatOfPoint p = new MatOfPoint(data.obszarSprawdzania.pobierzTablicePunktow());
             points.add(p);
         } else {
 
@@ -89,50 +84,36 @@ public class Gaussian implements ChangedImageReader {
         // ---------------------------------
         // ---------------------------------
 
+        data.narysujPunkty(data.mRgba);
+        data.narysujKreski(data.mRgba);
+
         int number = 0;
-//        if (data.maWszystkiePunkty()) {
-
-        ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-        Mat hierarchy = new Mat();
-
-        Imgproc.findContours(thresh, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE,
-                new Point(0, 0));
-    /* Mat drawing = Mat.zeros( mIntermediateMat.size(), CvType.CV_8UC3 );
-     for( int i = 0; i< contours.size(); i++ )
-     {
-    Scalar color =new Scalar(Math.random()*255, Math.random()*255, Math.random()*255);
-     Imgproc.drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, new Point() );
-     }*/
-        hierarchy.release();
+        if (data.obszarSprawdzania.obszarUstawiony()) {
 
 
-        for (int i = 0; i < contours.size(); i++) {
-            MatOfPoint currentContour = contours.get(i);
-            double currentArea = Imgproc.contourArea(currentContour);
-//                double currentArea2 = Imgproc.contourArea(points.get(0));
-//            System.out.println(currentArea);
-//            System.out.println(currentArea2);
-//            System.out.println(currentArea2-currentArea3);
-            if (currentArea > 500) {
-                number++;
-                Rect rectangle = Imgproc.boundingRect(currentContour);
-                Imgproc.rectangle(data.mRgba, rectangle.tl(), rectangle.br(), new Scalar(255, 0, 0), -1);
+            ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+            Mat hierarchy = new Mat();
+
+            Imgproc.findContours(fin, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE,
+                    new Point(0, 0));
+            hierarchy.release();
+
+            for (int i = 0; i < contours.size(); i++) {
+                MatOfPoint currentContour = contours.get(i);
+                double currentArea = Imgproc.contourArea(currentContour);
+                if (currentArea > 500) {
+                    number++;
+                    Rect rectangle = Imgproc.boundingRect(currentContour);
+                    Imgproc.rectangle(data.mRgba, rectangle.tl(), rectangle.br(), new Scalar(255, 0, 0), 1);
+                }
             }
         }
-//        }
 
         data.liczbaSamochodow += Math.max(number - data.poprzedniaLiczbaSamochodow, 0);
         data.poprzedniaLiczbaSamochodow = number;
-        System.out.println("**********************");
-        System.out.println("poprzednia " + data.poprzedniaLiczbaSamochodow);
-        System.out.println("liczba " + data.liczbaSamochodow);
-        System.out.println("number " + number);
-        System.out.println("wyliczenie " + Math.max(number - data.poprzedniaLiczbaSamochodow, 0));
-        System.out.println("**********************");
 
         Imgproc.putText(data.mRgba, "Liczba samochodow: " + data.liczbaSamochodow, new Point(0, 30), 1, 1.4, new Scalar(255, 255, 0), 1);
 
-//        last = data.mRgba.clone();
         clone.release();
 
         return data.mRgba;

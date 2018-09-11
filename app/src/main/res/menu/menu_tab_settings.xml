@@ -3,7 +3,30 @@
     tools:context="com.cichon.TabSettingsActivity">
     <item
         android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never"
         android:title="@string/action_settings" />
+
+
+    <item
+        android:id="@+id/mode"
+        android:title="Tryb">
+
+        <menu>
+            <item
+                android:id="@+id/item1"
+                android:contentDescription="Zliczanie samochodów"
+                android:title="Zliczanie samochodów" />
+            <item
+                android:id="@+id/item2"
+                android:contentDescription="Obraz referencyjny"
+                android:title="Obraz referencyjny" />
+            <item
+                android:id="@+id/item3"
+                android:contentDescription="Ustaw punkty"
+                android:title="Ustaw punkty" />
+
+        </menu>
+
+
+    </item>
+
 </menu>

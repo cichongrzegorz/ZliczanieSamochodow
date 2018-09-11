@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Liczenie Samochodów</string>
     <string name="title_activity_tab_settings">TabSettingsActivity</string>
-    <string name="action_settings">Settings</string>
+    <string name="action_settings">Ustawienia</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="reminder">test1</string>
     <!--<string name="done">test2</string>-->

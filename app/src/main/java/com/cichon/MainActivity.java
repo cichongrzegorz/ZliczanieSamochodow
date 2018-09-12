@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +17,12 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.cichon.detection.Gaussian;
+import com.cichon.detection.RozmycieGaussa;
+import com.cichon.ustawienia.ObserwatorUstawien;
+import com.cichon.ustawienia.OperacjeNaObrazach;
+import com.cichon.ustawienia.Pojazdy;
+import com.cichon.ustawienia.Ustawienia;
+import com.cichon.ustawienia.UstawieniaAplikacji;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -32,22 +36,18 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
-public class MainActivity extends AppCompatActivity implements CvCameraViewListener2, View.OnTouchListener {
+public class MainActivity extends AppCompatActivity implements CvCameraViewListener2, View.OnTouchListener, ObserwatorUstawien {
 
     private TrybAplikacji trybAplikacji = new TrybAplikacji();
     public ObszarSprawdzania obszarSprawdzania = new ObszarSprawdzania();
 
-    public int lowTreshold = 80;
-    public int highTreshold = 200;
-    public int rozmiar = 300;
-    public boolean skalaSzarosci;
-
     private CameraBridgeViewBase mOpenCvCameraView;
 
     public Mat mRgba;
-    private Settings settings = new Settings();
+    public Mat osobowy;
+    public Mat ciezarowka;
 
-    private Gaussian reader;
+    private RozmycieGaussa rozmycieGaussa;
     private int mGameWidth;
     private int mGameHeight;
 
@@ -55,10 +55,11 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     public int liczbaSamochodowOsobowych = 0;
     public int liczbaSamochodowCiezarowych = 0;
     public int poprzedniaLiczbaSamochodow = 0;
-    public Mat osobowy;
 
+    private Ustawienia operacjeNaObrazach;
+    private Ustawienia pojazdy;
 
-    public Mat ciezarowka;
+    private UstawieniaAplikacji ustawieniaAplikacji = new UstawieniaAplikacji();
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -76,8 +77,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                     imageView.setImageResource(R.raw.truck);
                     Util.wczytajMatDlaImageView(ciezarowka, imageView);
 
-//                    reader = new Rewrite(MainActivity.this);
-                    reader = new Gaussian(MainActivity.this);
+//                    rozmycieGaussa = new Rewrite(MainActivity.this);
+                    rozmycieGaussa = new RozmycieGaussa(MainActivity.this, ustawieniaAplikacji);
                     mOpenCvCameraView.enableView();
 
                 }
@@ -123,12 +124,13 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
     public void onCameraViewStopped() {
         mRgba.release();
-        reader.zwolnijObrazy();
         this.osobowy.release();
+        this.ciezarowka.release();
+        rozmycieGaussa.zwolnijObrazy();
     }
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
-        return reader.readImage(inputFrame);
+        return rozmycieGaussa.readImage(inputFrame);
     }
 
     private void requestPermission(String permission) {
@@ -156,23 +158,23 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         mOpenCvCameraView.setCvCameraViewListener(MainActivity.this);
         mOpenCvCameraView.setOnTouchListener(MainActivity.this);
 
-        settings = new Settings();
-
+        operacjeNaObrazach = new OperacjeNaObrazach(ustawieniaAplikacji);
+        pojazdy = new Pojazdy(ustawieniaAplikacji);
     }
 
-    public void openDialog() {
+    private void ustawieniaPojazdow() {
 
         LayoutInflater inflater = getLayoutInflater();
-        View alertLayout = inflater.inflate(R.layout.settings, null);
+        View alertLayout = inflater.inflate(R.layout.ustawienia_pojazdow, null);
 
-        settings.initialize(alertLayout);
-
+        pojazdy.inicjalizuj(alertLayout);
+        pojazdy.zresetowanoUstawienia();
 
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Ustawienia");
+        alert.setTitle("Ustawienia pojazdów");
         alert.setView(alertLayout);
 
-        alert.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+        alert.setPositiveButton("Zapisz", new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -183,11 +185,30 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         dialog.show();
     }
 
-    private void zmienionoUstawienia() {
-        lowTreshold = settings.lowTreshold;
-        highTreshold = settings.highTreshold;
-        skalaSzarosci = settings.isSkalaSzarosci;
-        rozmiar = settings.rozmiar;
+    private void ustawieniaPrzeksztalcen() {
+
+
+        LayoutInflater inflater = getLayoutInflater();
+        View alertLayout = inflater.inflate(R.layout.ustawienia_przeksztalcen, null);
+
+        operacjeNaObrazach.inicjalizuj(alertLayout);
+        operacjeNaObrazach.zresetowanoUstawienia();
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Ustawienia przekszatałceń");
+        alert.setView(alertLayout);
+
+        alert.setPositiveButton("Zapisz", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                zmienionoUstawienia();
+            }
+        });
+        AlertDialog dialog = alert.create();
+        dialog.show();
+    }
+
+    public void zmienionoUstawienia() {
     }
 
     @Override
@@ -202,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         }
 
         if (trybAplikacji.getTryb() == TrybAplikacji.Tryb.OBRAZ_REFERENCYJNY) {
-            ((Gaussian) reader).setReferenceFrame();
+            rozmycieGaussa.setReferenceFrame();
             this.liczbaSamochodow = 0;
             this.poprzedniaLiczbaSamochodow = 0;
             ustawLiczenie();
@@ -235,8 +256,12 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
-            openDialog();
+        if (id == R.id.ustawienia_przeksztalcen) {
+            ustawieniaPrzeksztalcen();
+            return true;
+        }
+        if (id == R.id.ustawienia_samochodow) {
+            ustawieniaPojazdow();
             return true;
         }
         if (id == R.id.zliczanie) {
@@ -263,11 +288,11 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
     private void ustawLiczenie() {
         trybAplikacji.ustawLiczenie();
-        if (obszarSprawdzania.obszarUstawiony() && this.reader.getRef() != null) {
+        if (obszarSprawdzania.obszarUstawiony() && this.rozmycieGaussa.getObrazReferencyjny() != null) {
             setTitle("Liczenie samochodów");
             return;
         }
-        if (!obszarSprawdzania.obszarUstawiony() && this.reader.getRef() == null) {
+        if (!obszarSprawdzania.obszarUstawiony() && this.rozmycieGaussa.getObrazReferencyjny() == null) {
             setTitle("Proszę ustawić obraz referencyjny i obszar");
             return;
         }
@@ -302,8 +327,9 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     }
 
     private void resetuj() {
-        this.reader.resetRef();
+        this.rozmycieGaussa.resetRef();
         this.obszarSprawdzania.resetuj();
+        this.ustawieniaAplikacji.resetuj();
         ustawLiczenie();
     }
 }

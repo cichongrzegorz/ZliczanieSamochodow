@@ -2,8 +2,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.cichon.TabSettingsActivity">
     <item
-        android:id="@+id/action_settings"
-        android:title="@string/action_settings" />
+        android:id="@+id/ustawienia_samochodow"
+        android:title="@string/ustawienia_samochodow" />
+    <item
+        android:id="@+id/ustawienia_przeksztalcen"
+        android:title="@string/ustawienia_przeksztalcen" />
 
     <item
         android:id="@+id/resetuj"

@@ -1,7 +1,10 @@
 package com.cichon.ustawienia;
 
-public interface Ustawienia {
-    void resetuj();
+import android.view.View;
 
-    void dodajObserwatora(ObserwatorUstawien obserwator);
+public interface Ustawienia {
+
+    void inicjalizuj(View view);
+
+    void zresetowanoUstawienia();
 }

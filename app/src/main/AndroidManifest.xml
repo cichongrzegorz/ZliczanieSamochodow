@@ -32,20 +32,19 @@
         android:icon="@mipmap/app"
         android:installLocation="auto"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:roundIcon="@mipmap/app"
         android:supportsRtl="true"
-        android:largeHeap="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.cichon.MainActivity" android:screenOrientation="landscape">
+        <activity
+            android:name="com.cichon.MainActivity"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.cichon.Settings"
-            android:label="@string/title_activity_settings"></activity>
     </application>
 
 </manifest>

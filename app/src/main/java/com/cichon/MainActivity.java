@@ -4,9 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -18,14 +16,9 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.ImageView;
 
-import com.cichon.detection.Bitwise;
-import com.cichon.detection.ChangedImageReader;
 import com.cichon.detection.Gaussian;
-import com.cichon.detection.Rewrite;
-import com.cichon.gaussian.MixtureOfGaussianBackground;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
@@ -37,10 +30,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
-
-import java.io.File;
 
 public class MainActivity extends AppCompatActivity implements CvCameraViewListener2, View.OnTouchListener {
 
@@ -52,46 +42,44 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     public int rozmiar = 300;
     public boolean skalaSzarosci;
 
-    private TextView lowTresholdTV;
-    private TextView highTresholdTV;
-
-    // Used for logging success or failure messages
-    private static final String TAG = "OCVSample::Activity";
-
-    // Loads camera view of OpenCV for us to use. This lets us see using OpenCV
     private CameraBridgeViewBase mOpenCvCameraView;
 
     public Mat mRgba;
-    Mat mRgbaF;
-    Mat mRgbaT;
-    public Mat mIntermediateMat;
-    private Mat mGray;
-    public Mat hierarchy;
-    private RelativeLayout tv;
     private Settings settings = new Settings();
-    public MixtureOfGaussianBackground videoProcessor;
 
-    private ChangedImageReader reader;
+    private Gaussian reader;
     private int mGameWidth;
     private int mGameHeight;
-    public Mat mRgbaPrev;
-    public String wybranaOpcja;
+
     public int liczbaSamochodow = 0;
+    public int liczbaSamochodowOsobowych = 0;
+    public int liczbaSamochodowCiezarowych = 0;
     public int poprzedniaLiczbaSamochodow = 0;
+    public Mat osobowy;
 
 
-    public MainActivity() {
-        Log.i(TAG, "Instantiated new " + this.getClass());
-    }
+    public Mat ciezarowka;
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
-                    reader = new Rewrite(MainActivity.this);
-//                    reader = new Gaussian(MainActivity.this);
+
+                    osobowy = new Mat();
+                    ImageView imageView = new ImageView(MainActivity.this);
+                    imageView.setImageResource(R.raw.car);
+                    Util.wczytajMatDlaImageView(osobowy, imageView);
+
+                    ciezarowka = new Mat();
+                    imageView = new ImageView(MainActivity.this);
+                    imageView.setImageResource(R.raw.truck);
+                    Util.wczytajMatDlaImageView(ciezarowka, imageView);
+
+//                    reader = new Rewrite(MainActivity.this);
+                    reader = new Gaussian(MainActivity.this);
                     mOpenCvCameraView.enableView();
+
                 }
                 break;
                 default: {
@@ -113,10 +101,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     public void onResume() {
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
-            Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
         } else {
-            Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
     }
@@ -133,27 +119,17 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         mGameHeight = height;
 
         mRgba = new Mat(height, width, CvType.CV_8UC4);
-        mRgbaPrev = new Mat(height, width, CvType.CV_8UC4);
-        mIntermediateMat = new Mat(height, width, CvType.CV_8UC4);
-        mGray = new Mat(height, width, CvType.CV_8UC1);
-        hierarchy = new Mat();
     }
 
     public void onCameraViewStopped() {
         mRgba.release();
-        mRgbaPrev.release();
-        mGray.release();
-        mIntermediateMat.release();
-        hierarchy.release();
         reader.zwolnijObrazy();
+        this.osobowy.release();
     }
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         return reader.readImage(inputFrame);
     }
-
-    public int counter = 0;
-
 
     private void requestPermission(String permission) {
         if (ContextCompat.checkSelfPermission(this,
@@ -180,21 +156,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         mOpenCvCameraView.setCvCameraViewListener(MainActivity.this);
         mOpenCvCameraView.setOnTouchListener(MainActivity.this);
 
-//        File root = Environment.getExternalStorageDirectory();
-//        File file = new File(root, "/drawable/ic_launcher_background.xml");
-
-        System.out.println("*********************************");
-        System.out.println("*********************************");
-        System.out.println("*********************************");
-        System.out.println("*********************************");
-        System.out.println("*********************************");
-        System.out.println("*********************************");
-        System.out.println("*********************************");
-        System.out.println("*********************************");
-        System.out.println("*********************************");
-//        System.out.println(file.length());
-
         settings = new Settings();
+
     }
 
     public void openDialog() {
@@ -225,10 +188,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
         highTreshold = settings.highTreshold;
         skalaSzarosci = settings.isSkalaSzarosci;
         rozmiar = settings.rozmiar;
-        wybranaOpcja = settings.wybranaOpcja;
     }
-
-    long then = 0;
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -245,8 +205,7 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
             ((Gaussian) reader).setReferenceFrame();
             this.liczbaSamochodow = 0;
             this.poprzedniaLiczbaSamochodow = 0;
-            trybAplikacji.ustawLiczenie();
-            setTitle("Z trybem " + trybAplikacji.getTryb());
+            ustawLiczenie();
             return true;
         }
 
@@ -260,14 +219,11 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
         obszarSprawdzania.dodajNastepny(x, y);
         if (obszarSprawdzania.obszarUstawiony()) {
-            trybAplikacji.ustawLiczenie();
-            setTitle("Z trybem " + trybAplikacji.getTryb());
+            ustawLiczenie();
         }
 
         return true;
     }
-
-    Menu optionsMenu;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -283,30 +239,49 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
             openDialog();
             return true;
         }
-        if (id == R.id.item1) {
-            trybAplikacji.ustawLiczenie();
-            setTitle("Z trybem " + trybAplikacji.getTryb());
+        if (id == R.id.zliczanie) {
+            ustawLiczenie();
             return true;
         }
-        if (id == R.id.item2) {
+        if (id == R.id.obrazReferencyjny) {
             trybAplikacji.ustawObrazReferencyjny();
-            setTitle("Z trybem " + trybAplikacji.getTryb());
+            setTitle("Proszę ustaw obraz wzorcowy (kliknij na ekranie)");
             return true;
         }
-        if (id == R.id.item3) {
+        if (id == R.id.ustawieniePunktow) {
             trybAplikacji.ustawPunkty();
-            setTitle("Z trybem " + trybAplikacji.getTryb());
+            setTitle("Proszę wybierz obszar na ekranie (4 punkty)");
+            return true;
+        }
+        if (id == R.id.resetuj) {
+            this.resetuj();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    private void ustawLiczenie() {
+        trybAplikacji.ustawLiczenie();
+        if (obszarSprawdzania.obszarUstawiony() && this.reader.getRef() != null) {
+            setTitle("Liczenie samochodów");
+            return;
+        }
+        if (!obszarSprawdzania.obszarUstawiony() && this.reader.getRef() == null) {
+            setTitle("Proszę ustawić obraz referencyjny i obszar");
+            return;
+        }
+        if (!obszarSprawdzania.obszarUstawiony()) {
+            setTitle("Proszę ustawić obszar");
+            return;
+        }
+        setTitle("Proszę ustawić obraz referencyjny");
+    }
+
     public void narysujPunkty(Mat mat) {
         Point[] punkty = obszarSprawdzania.pobierzTablicePunktow();
         for (int i = 0; i < punkty.length; i++) {
-            Imgproc.circle(mat, punkty[i], 3, new Scalar(255, 255, 0), -1);
-
+            Imgproc.circle(mat, punkty[i], 3, Util.pomaranczowy, -1);
         }
     }
 
@@ -319,11 +294,16 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
 
         for (int i = 1; i < punkty.length; i++) {
-            Imgproc.line(mat, punkty[i], punkty[i - 1], new Scalar(255, 255, 0), 3);
+            Imgproc.line(mat, punkty[i], punkty[i - 1], Util.pomaranczowy, 3);
         }
         if (obszarSprawdzania.obszarUstawiony()) {
-            Imgproc.line(mat, punkty[0], punkty[punkty.length - 1], new Scalar(255, 255, 0), 3);
+            Imgproc.line(mat, punkty[0], punkty[punkty.length - 1], Util.pomaranczowy, 3);
         }
+    }
 
+    private void resetuj() {
+        this.reader.resetRef();
+        this.obszarSprawdzania.resetuj();
+        ustawLiczenie();
     }
 }

@@ -5,6 +5,9 @@
         android:id="@+id/action_settings"
         android:title="@string/action_settings" />
 
+    <item
+        android:id="@+id/resetuj"
+        android:title="@string/resetuj" />
 
     <item
         android:id="@+id/mode"
@@ -12,15 +15,15 @@
 
         <menu>
             <item
-                android:id="@+id/item1"
+                android:id="@+id/zliczanie"
                 android:contentDescription="Zliczanie samochodów"
                 android:title="Zliczanie samochodów" />
             <item
-                android:id="@+id/item2"
+                android:id="@+id/obrazReferencyjny"
                 android:contentDescription="Obraz referencyjny"
                 android:title="Obraz referencyjny" />
             <item
-                android:id="@+id/item3"
+                android:id="@+id/ustawieniePunktow"
                 android:contentDescription="Ustaw punkty"
                 android:title="Ustaw punkty" />
 

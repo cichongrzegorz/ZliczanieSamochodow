@@ -17,7 +17,7 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-public class Rewrite implements ChangedImageReader {
+public class Rewrite {
     private final MainActivity data;
 
     Mat im;
@@ -27,15 +27,12 @@ public class Rewrite implements ChangedImageReader {
         this.im = new Mat();
     }
 
-    @Override
     public Mat readImage(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-
         ImageView imageView = new ImageView(this.data);
         imageView.setImageResource(R.mipmap.app);
         return Util.wczytajMatDlaImageView(this.im, imageView);
     }
 
-    @Override
     public void zwolnijObrazy() {
 
     }

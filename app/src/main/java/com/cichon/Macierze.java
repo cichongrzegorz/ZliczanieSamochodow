@@ -25,6 +25,14 @@ public class Macierze {
         return this.macierze.get(klucz);
     }
 
+    public Mat pobierzLubDodajIPobierz(String klucz) {
+        Mat macierz = this.macierze.get(klucz);
+        if (macierz == null) {
+            return this.dodajPusta(klucz);
+        }
+        return macierz;
+    }
+
     public void zwolnijWszystkie() {
         for (Mat macierz : macierze.values()) {
             if (macierz != null)

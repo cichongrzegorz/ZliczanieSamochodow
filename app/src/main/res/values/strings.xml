@@ -1,13 +1,10 @@
 <resources>
-    <string name="app_name">Liczenie Samochodów</string>
+    <string name="app_name">Aplikacja do zliczania samochodow</string>
     <string name="title_activity_tab_settings">TabSettingsActivity</string>
     <string name="action_settings">Ustawienia</string>
-    <string name="section_format">Hello World from section: %1$d</string>
-    <string name="reminder">test1</string>
-    <!--<string name="done">test2</string>-->
+    <string name="resetuj">Resetuj</string>
     <string name="dialog_title">Ustawienia moje</string>
     <string name="title_activity_settings">SettingsActivity</string>
-
 
     <string name="clahe">Step 1. Clahe</string>
     <string name="canny">Step 2. Canny</string>

@@ -18,64 +18,55 @@
             android:focusableInTouchMode="true"
             android:orientation="vertical">
 
-            <Switch
-                android:id="@+id/skalaSzarosci"
-                android:layout_width="wrap_content"
-                android:layout_height="70dp"
-                android:text="Skala szarości" />
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="32dp"
-                android:text="Prosze podać szrokość rozmycia Gaussa" />
-
-            <EditText
-                android:id="@+id/szerokoscGauss"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:text="Proszę podać szerokość rozmycia Gaussa" />
 
             <TextView
+                android:id="@+id/szerokoscText"
                 android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:layout_alignParentStart="true"
-                android:text="Prosze podać wysokość rozmycia Gaussa" />
+                android:layout_height="wrap_content" />
 
-            <EditText
-                android:id="@+id/wysokoscGauss"
+            <SeekBar
+                android:id="@+id/szerokoscGaussSeek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
+                android:max="25" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="32dp"
                 android:layout_alignParentStart="true"
-                android:text="Prosze podać sigmę rozmycia Gaussa" />
+                android:text="Proszę podać wysokość rozmycia Gaussa" />
 
-            <EditText
-                android:id="@+id/sigmaGauss"
+            <TextView
+                android:id="@+id/wysokoscText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <SeekBar
+                android:id="@+id/wysokoscGaussSeek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="numberDecimal" />
+                android:max="25" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="32dp"
                 android:layout_alignParentStart="true"
-                android:text="Prosze podać poziom progowania binarnego" />
+                android:text="Proszę podać sigmę rozmycia Gaussa" />
 
-            <EditText
-                android:id="@+id/progowanieBinarne"
+            <TextView
+                android:id="@+id/sigmaText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <SeekBar
+                android:id="@+id/sigmaGaussSeek"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="number" />
-
-            <Spinner
-                android:id="@+id/pokazObraz"
-                android:layout_width="match_parent"
-                android:layout_height="49dp"
-                android:entries="@array/obraz" />
+                android:max="60" />
 
         </LinearLayout>
     </ScrollView>

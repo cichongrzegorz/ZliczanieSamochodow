@@ -4,8 +4,6 @@ public class UstawieniaAplikacji {
 
     private String obraz;
 
-    public boolean skalaSzarosci;
-
     public int szerokosc;
     public int wysokosc;
     public double sigma;
@@ -30,14 +28,6 @@ public class UstawieniaAplikacji {
 
         this.wielkoscSamochodu = 4000;
         this.przelicznikCiezarowki = 2.0;
-    }
-
-    public boolean isSkalaSzarosci() {
-        return skalaSzarosci;
-    }
-
-    public void setSkalaSzarosci(boolean skalaSzarosci) {
-        this.skalaSzarosci = skalaSzarosci;
     }
 
     public int getSzerokosc() {

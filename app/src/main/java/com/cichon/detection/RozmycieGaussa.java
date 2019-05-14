@@ -41,6 +41,12 @@ public class RozmycieGaussa {
 
         Mat gauss = rozmycieGaussa();
 
+//        System.out.println("*****************************");
+//        System.out.println("*****************************");
+//        System.out.println("***************************** " + ustawienia.getSzerokosc());
+//        System.out.println("***************************** " + ustawienia.getWysokosc());
+//        System.out.println("*****************************");
+//        System.out.println("*****************************");
         Imgproc.GaussianBlur(frame(), gauss, new Size(ustawienia.getSzerokosc(), ustawienia.getWysokosc()), ustawienia.getSigma());
 
         if ("Rozmycie Gaussa".equals(ustawienia.getObraz())) {

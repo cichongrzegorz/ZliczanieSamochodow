@@ -152,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
         setContentView(R.layout.show_camera);
         requestPermission(Manifest.permission.CAMERA);
+        requestPermission(Manifest.permission.READ_EXTERNAL_STORAGE);
+        requestPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
         mOpenCvCameraView = (JavaCameraView) findViewById(R.id.show_camera_activity_java_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
@@ -327,6 +329,11 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
     }
 
     private void resetuj() {
+        liczbaSamochodow = 0;
+        liczbaSamochodowOsobowych = 0;
+        liczbaSamochodowCiezarowych = 0;
+        poprzedniaLiczbaSamochodow = 0;
+
         this.rozmycieGaussa.resetRef();
         this.obszarSprawdzania.resetuj();
         this.ustawieniaAplikacji.resetuj();

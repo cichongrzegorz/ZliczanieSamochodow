@@ -3,6 +3,7 @@ package com.cichon.detection;
 import com.cichon.Macierze;
 import com.cichon.MainActivity;
 import com.cichon.Util;
+import com.cichon.plik.ZapisPliku;
 import com.cichon.ustawienia.UstawieniaAplikacji;
 
 import org.opencv.android.CameraBridgeViewBase;
@@ -15,10 +16,18 @@ import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class RozmycieGaussa {
+
+    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ss");
+
+    private ZapisPliku zapisPliku;
+
+    private final Samochody samochody;
 
     private final MainActivity main;
     private final UstawieniaAplikacji ustawienia;
@@ -31,6 +40,7 @@ public class RozmycieGaussa {
         this.main = mainActivity;
         this.ustawienia = ustawieniaAplikacji;
         macierze = new Macierze();
+        this.samochody = new Samochody();
     }
 
     public Mat readImage(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
@@ -69,6 +79,9 @@ public class RozmycieGaussa {
         if ("Obraz Referencyjny".equals(ustawienia.getObraz())) {
             return this.obrazReferencyjny;
         }
+        if (zapisPliku == null) {
+            zapisPliku = new ZapisPliku("samochody-" + formatter.format(new Date()) + ".txt");
+        }
 
         Core.absdiff(obrazReferencyjny, gauss, delta());
 
@@ -93,6 +106,8 @@ public class RozmycieGaussa {
         // ---------------------------------
 
         int number = 0;
+        int numberOso = 0;
+        int numberTir = 0;
 
         ArrayList<MatOfPoint> kontury = new ArrayList<MatOfPoint>();
         Mat hierarchy = new Mat();
@@ -108,14 +123,41 @@ public class RozmycieGaussa {
                 number++;
                 Rect rectangle = Imgproc.boundingRect(currentContour);
                 if (currentArea > ustawienia.getWielkoscSamochodu() * ustawienia.getPrzelicznikCiezarowki()) {
+                    numberTir++;
                     Imgproc.rectangle(main.mRgba, rectangle.tl(), rectangle.br(), Util.zielony, 1);
                 } else {
+                    numberOso++;
                     Imgproc.rectangle(main.mRgba, rectangle.tl(), rectangle.br(), Util.niebieski, 1);
                 }
             }
         }
 
-        main.liczbaSamochodow += Math.max(number - main.poprzedniaLiczbaSamochodow, 0);
+        int zmiana = number - main.poprzedniaLiczbaSamochodow;
+        if (zmiana >= 0) {
+            this.samochody.aktualizuj(numberTir, numberOso);
+        } else {
+            int tempTir = this.samochody.maxTir;
+            int tempOso = this.samochody.minOso;
+
+            int tiryDoDodania = Math.max(0, tempTir - numberTir);
+            main.liczbaSamochodowCiezarowych += tiryDoDodania;
+
+            int osoboweDoDodania = Math.max(0, tempOso - numberOso);
+            main.liczbaSamochodowOsobowych += osoboweDoDodania;
+
+            this.samochody.resetuj();
+            this.samochody.aktualizuj(numberTir, numberOso);
+
+            if (tiryDoDodania > 0) {
+                zapisPliku.zapisz("Dodano " + tiryDoDodania + " samochodow ciezarowych");
+            }
+            if (osoboweDoDodania > 0) {
+                zapisPliku.zapisz("Dodano " + osoboweDoDodania + " samochodow osobowych");
+            }
+
+        }
+
+//        main.liczbaSamochodow += Math.max(number - main.poprzedniaLiczbaSamochodow, 0);
         main.poprzedniaLiczbaSamochodow = number;
 
         Imgproc.rectangle(main.mRgba, new Point(0, 0), new Point(main.mRgba.width(), 40),
@@ -125,7 +167,7 @@ public class RozmycieGaussa {
         main.ciezarowka.copyTo(main.mRgba.colRange(300, main.osobowy.width() + 300).rowRange(0, main.osobowy.height() + 0));
 
 
-        Imgproc.putText(main.mRgba, " :" + main.liczbaSamochodow, new Point(90, 30), 1, 2, Util.niebieski, 2);
+        Imgproc.putText(main.mRgba, " :" + main.liczbaSamochodowOsobowych, new Point(90, 30), 1, 2, Util.niebieski, 2);
         Imgproc.putText(main.mRgba, " :" + main.liczbaSamochodowCiezarowych, new Point(340, 30), 1, 2, Util.zielony, 2);
 
         maska.release();
@@ -176,9 +218,17 @@ public class RozmycieGaussa {
     }
 
     public void resetRef() {
+        if (zapisPliku != null) {
+            zapisPliku.zapisz("-------------------");
+            zapisPliku.zapisz("Liczba samochodow osobowych: " + main.liczbaSamochodowOsobowych);
+            zapisPliku.zapisz("Liczba samochodow ciezarowych: " + main.liczbaSamochodowCiezarowych);
+            zapisPliku.zapisz("Data zakonczenia: " + formatter.format(new Date()));
+        }
+        zapisPliku = new ZapisPliku("samochody-" + formatter.format(new Date()) + ".txt");
         if (this.obrazReferencyjny != null) {
             this.obrazReferencyjny.release();
         }
         this.obrazReferencyjny = null;
+        this.samochody.resetuj();
     }
 }

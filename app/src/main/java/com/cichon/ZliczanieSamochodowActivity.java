@@ -36,7 +36,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.imgproc.Imgproc;
 
-public class MainActivity extends AppCompatActivity implements CvCameraViewListener2, View.OnTouchListener, ObserwatorUstawien {
+public class ZliczanieSamochodowActivity extends AppCompatActivity implements CvCameraViewListener2, View.OnTouchListener, ObserwatorUstawien {
 
     private TrybAplikacji trybAplikacji = new TrybAplikacji();
     public ObszarSprawdzania obszarSprawdzania = new ObszarSprawdzania();
@@ -68,17 +68,16 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
                 case LoaderCallbackInterface.SUCCESS: {
 
                     osobowy = new Mat();
-                    ImageView imageView = new ImageView(MainActivity.this);
+                    ImageView imageView = new ImageView(ZliczanieSamochodowActivity.this);
                     imageView.setImageResource(R.raw.car);
                     Util.wczytajMatDlaImageView(osobowy, imageView);
 
                     ciezarowka = new Mat();
-                    imageView = new ImageView(MainActivity.this);
+                    imageView = new ImageView(ZliczanieSamochodowActivity.this);
                     imageView.setImageResource(R.raw.truck);
                     Util.wczytajMatDlaImageView(ciezarowka, imageView);
 
-//                    rozmycieGaussa = new Rewrite(MainActivity.this);
-                    rozmycieGaussa = new RozmycieGaussa(MainActivity.this, ustawieniaAplikacji);
+                    rozmycieGaussa = new RozmycieGaussa(ZliczanieSamochodowActivity.this, ustawieniaAplikacji);
                     mOpenCvCameraView.enableView();
 
                 }
@@ -157,8 +156,8 @@ public class MainActivity extends AppCompatActivity implements CvCameraViewListe
 
         mOpenCvCameraView = (JavaCameraView) findViewById(R.id.show_camera_activity_java_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
-        mOpenCvCameraView.setCvCameraViewListener(MainActivity.this);
-        mOpenCvCameraView.setOnTouchListener(MainActivity.this);
+        mOpenCvCameraView.setCvCameraViewListener(ZliczanieSamochodowActivity.this);
+        mOpenCvCameraView.setOnTouchListener(ZliczanieSamochodowActivity.this);
 
         operacjeNaObrazach = new OperacjeNaObrazach(ustawieniaAplikacji);
         pojazdy = new Pojazdy(ustawieniaAplikacji);

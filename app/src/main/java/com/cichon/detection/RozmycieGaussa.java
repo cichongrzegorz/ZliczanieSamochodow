@@ -1,8 +1,8 @@
 package com.cichon.detection;
 
 import com.cichon.Macierze;
-import com.cichon.MainActivity;
 import com.cichon.Util;
+import com.cichon.ZliczanieSamochodowActivity;
 import com.cichon.plik.ZapisPliku;
 import com.cichon.ustawienia.UstawieniaAplikacji;
 
@@ -16,28 +16,25 @@ import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class RozmycieGaussa {
 
-    SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ss");
-
     private ZapisPliku zapisPliku;
 
     private final Samochody samochody;
 
-    private final MainActivity main;
+    private final ZliczanieSamochodowActivity main;
     private final UstawieniaAplikacji ustawienia;
     private Mat obrazReferencyjny;
     private Macierze macierze;
     private boolean ustawObrazReferencyjny = false;
 
 
-    public RozmycieGaussa(MainActivity mainActivity, UstawieniaAplikacji ustawieniaAplikacji) {
-        this.main = mainActivity;
+    public RozmycieGaussa(ZliczanieSamochodowActivity zliczanieSamochodowActivity, UstawieniaAplikacji ustawieniaAplikacji) {
+        this.main = zliczanieSamochodowActivity;
         this.ustawienia = ustawieniaAplikacji;
         macierze = new Macierze();
         this.samochody = new Samochody();
@@ -51,17 +48,7 @@ public class RozmycieGaussa {
 
         Mat gauss = rozmycieGaussa();
 
-//        System.out.println("*****************************");
-//        System.out.println("*****************************");
-//        System.out.println("***************************** " + ustawienia.getSzerokosc());
-//        System.out.println("***************************** " + ustawienia.getWysokosc());
-//        System.out.println("*****************************");
-//        System.out.println("*****************************");
         Imgproc.GaussianBlur(frame(), gauss, new Size(ustawienia.getSzerokosc(), ustawienia.getWysokosc()), ustawienia.getSigma());
-
-        if ("Rozmycie Gaussa".equals(ustawienia.getObraz())) {
-            return gauss;
-        }
 
         main.narysujPunkty(main.mRgba);
         main.narysujKreski(main.mRgba);
@@ -76,34 +63,21 @@ public class RozmycieGaussa {
         }
 
 
-        if ("Obraz Referencyjny".equals(ustawienia.getObraz())) {
-            return this.obrazReferencyjny;
-        }
         if (zapisPliku == null) {
-            zapisPliku = new ZapisPliku("samochody-" + formatter.format(new Date()) + ".txt");
+            zapisPliku = new ZapisPliku();
         }
 
         Core.absdiff(obrazReferencyjny, gauss, delta());
 
         Mat progowanie = progowanie();
         Imgproc.threshold(delta(), progowanie, ustawienia.getProgowanie(), 255, Imgproc.THRESH_BINARY);
-        if ("Progowanie Binarne".equals(ustawienia.getObraz())) {
-            return progowanie;
-        }
 
         if (!this.main.obszarSprawdzania.obszarUstawiony()) {
             return main.mRgba;
         }
         Mat maska = maska();
 
-//        Mat fin = macierze.pobierz("fin");
         Core.bitwise_and(progowanie, progowanie, finalnyObraz(), maska);
-
-        // ---------------------------------
-        // ---------------------------------
-        // ---------------------------------
-        // ---------------------------------
-        // ---------------------------------
 
         int number = 0;
         int numberOso = 0;
@@ -149,15 +123,14 @@ public class RozmycieGaussa {
             this.samochody.aktualizuj(numberTir, numberOso);
 
             if (tiryDoDodania > 0) {
-                zapisPliku.zapisz("Dodano " + tiryDoDodania + " samochodow ciezarowych");
+                zapisPliku.zapisz("Rozpoznano " + tiryDoDodania + " samochodow ciezarowych");
             }
             if (osoboweDoDodania > 0) {
-                zapisPliku.zapisz("Dodano " + osoboweDoDodania + " samochodow osobowych");
+                zapisPliku.zapisz("Rozpoznano " + osoboweDoDodania + " samochodow osobowych");
             }
 
         }
 
-//        main.liczbaSamochodow += Math.max(number - main.poprzedniaLiczbaSamochodow, 0);
         main.poprzedniaLiczbaSamochodow = number;
 
         Imgproc.rectangle(main.mRgba, new Point(0, 0), new Point(main.mRgba.width(), 40),
@@ -222,9 +195,9 @@ public class RozmycieGaussa {
             zapisPliku.zapisz("-------------------");
             zapisPliku.zapisz("Liczba samochodow osobowych: " + main.liczbaSamochodowOsobowych);
             zapisPliku.zapisz("Liczba samochodow ciezarowych: " + main.liczbaSamochodowCiezarowych);
-            zapisPliku.zapisz("Data zakonczenia: " + formatter.format(new Date()));
+            zapisPliku.zapisz("Data zakonczenia: " + ZapisPliku.FORMATTER.format(new Date()));
         }
-        zapisPliku = new ZapisPliku("samochody-" + formatter.format(new Date()) + ".txt");
+        zapisPliku.incjalizuj();
         if (this.obrazReferencyjny != null) {
             this.obrazReferencyjny.release();
         }

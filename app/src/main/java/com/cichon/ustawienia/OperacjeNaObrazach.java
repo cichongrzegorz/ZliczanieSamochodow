@@ -1,28 +1,14 @@
 package com.cichon.ustawienia;
 
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.SeekBar;
-import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 
 import com.cichon.R;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class OperacjeNaObrazach implements Ustawienia {
 
-    private List<String> wartosci = Arrays.asList(new String[]{"Zliczanie", "Rozmycie Gaussa", "Progowanie Binarne", "Obraz Referencyjny"});
-
     private UstawieniaAplikacji ustawieniaAplikacji;
-
-//    private Spinner obraz;
 
     private SeekBar szerokoscGaussSeek;
     private SeekBar wysokoscGaussSeek;
@@ -103,18 +89,6 @@ public class OperacjeNaObrazach implements Ustawienia {
             }
         });
 
-//        obraz = view.findViewById(R.id.pokazObraz);
-//        obraz.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                ustawieniaAplikacji.setObraz((String) parent.getItemAtPosition(position));
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//
-//            }
-//        });
     }
 
     @Override
@@ -126,7 +100,5 @@ public class OperacjeNaObrazach implements Ustawienia {
         wysokoscText.setText("Wysokość: " + (ustawieniaAplikacji.getWysokosc()));
         szerokoscText.setText("Szerokość: " + (ustawieniaAplikacji.getSzerokosc()));
         sigmaText.setText("Sigma: " + ((int) ustawieniaAplikacji.getSigma()));
-
-//        this.obraz.setSelection(wartosci.indexOf(ustawieniaAplikacji.getObraz()));
     }
 }

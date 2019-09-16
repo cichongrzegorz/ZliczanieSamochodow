@@ -5,12 +5,22 @@ import android.os.Environment;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ZapisPliku {
+
+    public static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd-hh.mm.ss");
+
     private String nazwaPliku;
 
-    public ZapisPliku(String nazwaPliku) {
-        this.nazwaPliku = nazwaPliku;
+
+    public ZapisPliku() {
+        this.incjalizuj();
+    }
+
+    public void incjalizuj() {
+        this.nazwaPliku = "raport-" + FORMATTER.format(new Date()) + ".txt";
     }
 
     public void zapisz(String data) {
@@ -27,7 +37,4 @@ public class ZapisPliku {
         }
     }
 
-    public String getNazwaPliku() {
-        return nazwaPliku;
-    }
 }
